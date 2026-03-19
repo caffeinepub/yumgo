@@ -4,6 +4,8 @@ export interface Session {
   email: string;
   role: "student" | "shopOwner";
   collegeDomain: string;
+  userType: "college" | "company";
+  orgName: string;
 }
 
 export interface MenuItem {
@@ -276,7 +278,6 @@ export function useStore() {
   function getShops(collegeDomain: string): Shop[] {
     const all = getLS<Shop[]>("shops", []);
     const domainShops = all.filter((s) => s.collegeDomain === collegeDomain);
-    // Inject demo shops for demo.edu
     if (collegeDomain === DEMO_DOMAIN) {
       const existingIds = new Set(domainShops.map((s) => s.id));
       const demos = DEMO_SHOPS.filter((d) => !existingIds.has(d.id));
@@ -306,7 +307,6 @@ export function useStore() {
   function getMenuItems(shopId: string): MenuItem[] {
     const all = getLS<Record<string, MenuItem[]>>("menuItems", {});
     const items = all[shopId] ?? [];
-    // Inject demo items for demo shops
     if (DEMO_MENU[shopId]) {
       const existingIds = new Set(items.map((i) => i.id));
       const demos = DEMO_MENU[shopId].filter((d) => !existingIds.has(d.id));
@@ -344,7 +344,6 @@ export function useStore() {
     if (idx >= 0) {
       items[idx] = { ...items[idx], isDeleted: true };
     } else if (DEMO_MENU[shopId]) {
-      // Need to store demo item as deleted
       const demoItem = DEMO_MENU[shopId].find((i) => i.id === itemId);
       if (demoItem) items.push({ ...demoItem, isDeleted: true });
     }
