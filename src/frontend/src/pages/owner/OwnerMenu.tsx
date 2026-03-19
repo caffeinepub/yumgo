@@ -25,8 +25,10 @@ export default function OwnerMenu({ store, navigate }: Props) {
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPrice, setNewPrice] = useState("");
+  const [newStock, setNewStock] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
   const [editingPrice, setEditingPrice] = useState<Record<string, string>>({});
+  const [editingStock, setEditingStock] = useState<Record<string, string>>({});
   const imgRef = useRef<HTMLInputElement>(null);
 
   if (!shop) {
@@ -49,10 +51,12 @@ export default function OwnerMenu({ store, navigate }: Props) {
       imageUrl: newImageUrl,
       price: Number(newPrice),
       isDeleted: false,
+      stock: newStock !== "" ? Number(newStock) : undefined,
     };
     store.saveMenuItem(item);
     setNewName("");
     setNewPrice("");
+    setNewStock("");
     setNewImageUrl("");
     setShowAdd(false);
     toast.success("Item added!");
@@ -77,6 +81,23 @@ export default function OwnerMenu({ store, navigate }: Props) {
     toast.success("Price updated");
   }
 
+  function handleSaveStock(item: MenuItem) {
+    const val = editingStock[item.id];
+    if (val === undefined || Number.isNaN(Number(val))) {
+      toast.error("Invalid stock");
+      return;
+    }
+    store.saveMenuItem({
+      ...item,
+      stock: val === "" ? undefined : Number(val),
+    });
+    setEditingStock((prev) => {
+      const { [item.id]: _, ...rest } = prev;
+      return rest;
+    });
+    toast.success("Stock updated");
+  }
+
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -86,25 +107,36 @@ export default function OwnerMenu({ store, navigate }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="bg-primary text-primary-foreground px-4 pt-10 pb-6 rounded-b-3xl shadow-card">
+    <div
+      className="min-h-screen pb-24"
+      style={{
+        background:
+          "linear-gradient(160deg, #0d1117 0%, #0a2744 50%, #003d82 100%)",
+      }}
+    >
+      <div
+        className="px-4 pt-10 pb-6 rounded-b-3xl shadow-card"
+        style={{
+          background: "linear-gradient(135deg, #0a2744 0%, #1565c0 100%)",
+        }}
+      >
         <button
           type="button"
           onClick={() => navigate("owner")}
-          className="text-primary-foreground/80 text-sm mb-3"
+          className="text-white/80 text-sm mb-3"
         >
           ← Back
         </button>
-        <h1 className="font-display text-2xl font-bold">Manage Menu</h1>
-        <p className="text-primary-foreground/70 text-sm">
-          {items.length} active items
-        </p>
+        <h1 className="text-white font-display text-2xl font-bold">
+          Manage Menu & Stock
+        </h1>
+        <p className="text-white/60 text-sm">{items.length} active items</p>
       </div>
 
       <div className="px-4 mt-5 space-y-3">
         {items.length === 0 ? (
           <div
-            className="text-center py-10 text-muted-foreground"
+            className="text-center py-10 text-white/60"
             data-ocid="menu_mgmt.empty_state"
           >
             <div className="text-5xl mb-3">🍱</div>
@@ -114,9 +146,9 @@ export default function OwnerMenu({ store, navigate }: Props) {
           items.map((item, i) => (
             <div
               key={item.id}
-              className="bg-card rounded-2xl shadow-xs p-3 flex gap-3 items-center"
+              className="bg-white rounded-2xl shadow-xs p-3 flex gap-3 items-start"
             >
-              <div className="w-14 h-14 rounded-xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+              <div className="w-14 h-14 rounded-xl bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
                 {item.imageUrl ? (
                   <img
                     src={item.imageUrl}
@@ -128,7 +160,11 @@ export default function OwnerMenu({ store, navigate }: Props) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate">{item.name}</p>
+                <p className="font-semibold text-sm truncate text-gray-900">
+                  {item.name}
+                </p>
+
+                {/* Price row */}
                 {editingPrice[item.id] !== undefined ? (
                   <div className="flex gap-1 mt-1">
                     <Input
@@ -161,13 +197,13 @@ export default function OwnerMenu({ store, navigate }: Props) {
                         })
                       }
                     >
-                      Cancel
+                      ×
                     </Button>
                   </div>
                 ) : (
                   <button
                     type="button"
-                    className="text-primary font-bold text-sm mt-0.5 hover:underline"
+                    className="text-blue-600 font-bold text-sm mt-0.5 hover:underline"
                     onClick={() =>
                       setEditingPrice((prev) => ({
                         ...prev,
@@ -176,17 +212,91 @@ export default function OwnerMenu({ store, navigate }: Props) {
                     }
                   >
                     ₹{item.price}{" "}
-                    <span className="text-xs text-muted-foreground font-normal">
-                      edit
+                    <span className="text-xs text-gray-400 font-normal">
+                      edit price
                     </span>
                   </button>
                 )}
+
+                {/* Stock row */}
+                <div className="mt-1.5">
+                  {editingStock[item.id] !== undefined ? (
+                    <div className="flex gap-1">
+                      <Input
+                        type="number"
+                        placeholder="Stock qty"
+                        value={editingStock[item.id]}
+                        onChange={(e) =>
+                          setEditingStock((prev) => ({
+                            ...prev,
+                            [item.id]: e.target.value,
+                          }))
+                        }
+                        className="h-7 rounded-lg text-xs w-24"
+                        data-ocid={`menu_mgmt.stock_input.${i + 1}`}
+                      />
+                      <Button
+                        size="sm"
+                        className="h-7 text-xs rounded-lg px-2 bg-emerald-600 hover:bg-emerald-700"
+                        onClick={() => handleSaveStock(item)}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs rounded-lg px-2"
+                        onClick={() =>
+                          setEditingStock((prev) => {
+                            const { [item.id]: _, ...rest } = prev;
+                            return rest;
+                          })
+                        }
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 text-xs"
+                      onClick={() =>
+                        setEditingStock((prev) => ({
+                          ...prev,
+                          [item.id]:
+                            item.stock !== undefined ? String(item.stock) : "",
+                        }))
+                      }
+                      data-ocid={`menu_mgmt.stock_button.${i + 1}`}
+                    >
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-semibold ${
+                          item.stock === undefined
+                            ? "bg-gray-100 text-gray-500"
+                            : item.stock <= 0
+                              ? "bg-red-100 text-red-600"
+                              : item.stock <= 5
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-emerald-100 text-emerald-700"
+                        }`}
+                      >
+                        📦{" "}
+                        {item.stock === undefined
+                          ? "Unlimited"
+                          : item.stock <= 0
+                            ? "Out of stock"
+                            : `${item.stock} left`}
+                      </span>
+                      <span className="text-gray-400">tap to update</span>
+                    </button>
+                  )}
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => handleDelete(item.id)}
                 data-ocid={`menu_mgmt.delete_button.${i + 1}`}
-                className="w-8 h-8 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center text-lg"
+                className="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center text-lg flex-shrink-0"
               >
                 ×
               </button>
@@ -198,7 +308,7 @@ export default function OwnerMenu({ store, navigate }: Props) {
       {/* Floating Add Button */}
       <div className="fixed bottom-4 left-4 right-4">
         <Button
-          className="w-full h-12 rounded-xl font-semibold"
+          className="w-full h-12 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700"
           onClick={() => setShowAdd(true)}
           data-ocid="menu_mgmt.add_item_button"
         >
@@ -231,6 +341,19 @@ export default function OwnerMenu({ store, navigate }: Props) {
                 onChange={(e) => setNewPrice(e.target.value)}
                 className="h-10 rounded-xl"
               />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Stock Available (optional)</Label>
+              <Input
+                type="number"
+                placeholder="Leave blank for unlimited"
+                value={newStock}
+                onChange={(e) => setNewStock(e.target.value)}
+                className="h-10 rounded-xl"
+              />
+              <p className="text-xs text-gray-400">
+                Students will see how many portions are left
+              </p>
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Image (optional)</Label>

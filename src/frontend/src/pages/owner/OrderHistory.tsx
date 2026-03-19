@@ -19,7 +19,12 @@ export default function OrderHistory({ store, navigate }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div
+      className="min-h-screen pb-10"
+      style={{
+        background: "linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)",
+      }}
+    >
       <div className="bg-primary text-primary-foreground px-4 pt-10 pb-6 rounded-b-3xl shadow-card">
         <button
           type="button"

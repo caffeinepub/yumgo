@@ -261,7 +261,12 @@ export default function OrderConfirmed({ store, navigate }: Props) {
         }
       `}</style>
 
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-10">
+      <div
+        className="min-h-screen flex flex-col items-center justify-center px-4 py-10"
+        style={{
+          background: "linear-gradient(135deg, #56ab2f 0%, #a8e063 100%)",
+        }}
+      >
         <div
           className={`w-full max-w-sm transition-all duration-500 ${
             show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"

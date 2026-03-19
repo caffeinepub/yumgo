@@ -66,7 +66,12 @@ export default function OwnerSettings({ store, navigate }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div
+      className="min-h-screen pb-10"
+      style={{
+        background: "linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%)",
+      }}
+    >
       <div className="bg-primary text-primary-foreground px-4 pt-10 pb-6 rounded-b-3xl shadow-card">
         <button
           type="button"

@@ -50,9 +50,20 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div
+      className="min-h-screen pb-10"
+      style={{
+        background:
+          "linear-gradient(160deg, #0a0a0a 0%, #1a0533 50%, #2d1b69 100%)",
+      }}
+    >
       {/* Header */}
-      <div className="bg-primary text-primary-foreground px-4 pt-10 pb-6 rounded-b-3xl shadow-card">
+      <div
+        className="px-4 pt-10 pb-6 rounded-b-3xl shadow-card"
+        style={{
+          background: "linear-gradient(135deg, #1a0533 0%, #4a1f6d 100%)",
+        }}
+      >
         <div className="flex items-center justify-between mb-2">
           <img
             src="/assets/uploads/logo.png-1.jpeg"
@@ -64,7 +75,7 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
               type="button"
               onClick={() => navigate("owner-history")}
               data-ocid="owner.history_button"
-              className="text-xs bg-primary-foreground/20 px-3 py-1.5 rounded-lg font-medium"
+              className="text-xs bg-white/20 text-white px-3 py-1.5 rounded-lg font-medium"
             >
               History
             </button>
@@ -72,29 +83,29 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
               type="button"
               onClick={() => navigate("owner-settings")}
               data-ocid="owner.settings_button"
-              className="text-xs bg-primary-foreground/20 px-3 py-1.5 rounded-lg font-medium"
+              className="text-xs bg-white/20 text-white px-3 py-1.5 rounded-lg font-medium"
             >
               Settings
             </button>
             <button
               type="button"
               onClick={onLogout}
-              className="text-xs text-primary-foreground/70"
+              className="text-xs text-white/60"
             >
               Logout
             </button>
           </div>
         </div>
-        <h2 className="font-display text-2xl font-bold mt-2">
+        <h2 className="text-white font-display text-2xl font-bold mt-2">
           {shop?.name ?? "My Shop"}
         </h2>
-        <p className="text-primary-foreground/70 text-sm">{session.email}</p>
+        <p className="text-white/60 text-sm">{session.email}</p>
       </div>
 
       <div className="px-4 mt-5 space-y-4">
         {/* Setup Prompt */}
         {showSetup && (
-          <div className="bg-card rounded-2xl shadow-xs p-5 animate-pop">
+          <div className="bg-white rounded-2xl shadow-xs p-5 animate-pop">
             <h3 className="font-display text-lg font-bold mb-4">
               🏪 Setup Your Shop
             </h3>
@@ -126,16 +137,16 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
 
         {/* Quick Actions */}
         {shop && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <button
               type="button"
               onClick={() => navigate("owner-menu")}
               data-ocid="owner.menu_button"
-              className="bg-card rounded-2xl shadow-xs p-4 text-left hover:shadow-card transition-shadow"
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-left hover:bg-white/20 transition-colors"
             >
               <div className="text-2xl mb-1">🍴</div>
-              <p className="font-semibold text-sm">Manage Menu</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="font-semibold text-sm text-white">Menu</p>
+              <p className="text-xs text-white/50">
                 {
                   store.getAllMenuItems(shop.id).filter((i) => !i.isDeleted)
                     .length
@@ -145,12 +156,21 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
             </button>
             <button
               type="button"
+              onClick={() => navigate("owner-menu")}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-left hover:bg-white/20 transition-colors"
+            >
+              <div className="text-2xl mb-1">📦</div>
+              <p className="font-semibold text-sm text-white">Stock</p>
+              <p className="text-xs text-white/50">Manage stock</p>
+            </button>
+            <button
+              type="button"
               onClick={() => navigate("owner-settings")}
-              className="bg-card rounded-2xl shadow-xs p-4 text-left hover:shadow-card transition-shadow"
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-left hover:bg-white/20 transition-colors"
             >
               <div className="text-2xl mb-1">⚙️</div>
-              <p className="font-semibold text-sm">Settings</p>
-              <p className="text-xs text-muted-foreground">Shop info & UPI</p>
+              <p className="font-semibold text-sm text-white">Settings</p>
+              <p className="text-xs text-white/50">Shop & UPI</p>
             </button>
           </div>
         )}
@@ -159,19 +179,23 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
         {shop && (
           <div data-ocid="owner.orders_panel">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display text-lg font-bold">Live Orders</h3>
+              <h3 className="font-display text-lg font-bold text-white">
+                Live Orders
+              </h3>
               {activeOrders.length > 0 && (
-                <Badge className="bg-primary">{activeOrders.length} new</Badge>
+                <Badge className="bg-rose-500">{activeOrders.length} new</Badge>
               )}
             </div>
             {activeOrders.length === 0 ? (
               <div
-                className="text-center py-10 bg-card rounded-2xl text-muted-foreground"
+                className="text-center py-10 bg-white/10 rounded-2xl text-white/60"
                 data-ocid="owner.orders.empty_state"
               >
                 <div className="text-4xl mb-2">🔔</div>
                 <p className="text-sm">No active orders right now</p>
-                <p className="text-xs mt-1">New orders will appear here</p>
+                <p className="text-xs mt-1 text-white/40">
+                  New orders will appear here
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -198,11 +222,13 @@ function OrderCard({
   onComplete,
 }: { order: Order; index: number; onComplete: () => void }) {
   return (
-    <div className="bg-card rounded-2xl shadow-xs p-4 animate-slide-up">
+    <div className="bg-white rounded-2xl shadow-xs p-4 animate-slide-up">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="font-bold text-primary text-sm">#{order.billNumber}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="font-bold text-purple-700 text-sm">
+            #{order.billNumber}
+          </p>
+          <p className="text-xs text-gray-400">
             {new Date(order.createdAt).toLocaleTimeString()}
           </p>
         </div>
@@ -219,9 +245,7 @@ function OrderCard({
             <span>
               {item.name} x{item.quantity}
             </span>
-            <span className="text-muted-foreground">
-              ₹{item.price * item.quantity}
-            </span>
+            <span className="text-gray-500">₹{item.price * item.quantity}</span>
           </div>
         ))}
       </div>
@@ -229,21 +253,19 @@ function OrderCard({
         <span className="font-bold text-sm">Total: ₹{order.total}</span>
       </div>
       {order.deliveryDetails && (
-        <div className="mt-2 bg-muted/50 rounded-xl p-2 text-xs">
+        <div className="mt-2 bg-gray-50 rounded-xl p-2 text-xs">
           <p className="font-semibold">
             📦 Deliver to: {order.deliveryDetails.name}
           </p>
-          <p className="text-muted-foreground">
+          <p className="text-gray-500">
             {order.deliveryDetails.department}, {order.deliveryDetails.year},{" "}
             {order.deliveryDetails.floor}
           </p>
-          <p className="text-muted-foreground">
-            📞 {order.deliveryDetails.phone}
-          </p>
+          <p className="text-gray-500">📞 {order.deliveryDetails.phone}</p>
         </div>
       )}
       <Button
-        className="w-full mt-3 rounded-xl h-9 text-sm"
+        className="w-full mt-3 rounded-xl h-9 text-sm bg-purple-600 hover:bg-purple-700"
         onClick={onComplete}
         data-ocid={`owner.complete_button.${index}`}
       >

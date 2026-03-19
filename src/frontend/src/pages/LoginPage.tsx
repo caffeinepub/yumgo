@@ -98,7 +98,6 @@ export default function LoginPage({ onLogin }: Props) {
   const store = useStore();
   const [step, setStep] = useState<Step>("select");
 
-  // College form state
   const [collegeName, setCollegeName] = useState("");
   const [collegeEmail, setCollegeEmail] = useState("");
   const [collegeRole, setCollegeRole] = useState<"student" | "shopOwner">(
@@ -106,7 +105,6 @@ export default function LoginPage({ onLogin }: Props) {
   );
   const [collegeEmailError, setCollegeEmailError] = useState("");
 
-  // Company form state
   const [companyName, setCompanyName] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
 
@@ -182,12 +180,6 @@ export default function LoginPage({ onLogin }: Props) {
           }}
         />
       </div>
-      <h1 className="mt-2 text-2xl font-extrabold text-white drop-shadow-md tracking-tight">
-        YumGo
-      </h1>
-      <p className="text-sm font-medium text-white/90 drop-shadow">
-        Smart pre-order for college canteens
-      </p>
     </div>
   );
 
@@ -199,7 +191,6 @@ export default function LoginPage({ onLogin }: Props) {
           "linear-gradient(135deg, #c2410c 0%, #ea580c 20%, #f97316 45%, #fb923c 70%, #fbbf24 100%)",
       }}
     >
-      {/* Floating food emoji decorations */}
       {floatingEmojis.map((item) => (
         <div
           key={item.id}
@@ -222,7 +213,6 @@ export default function LoginPage({ onLogin }: Props) {
         {logoSection}
 
         <AnimatePresence mode="wait">
-          {/* Step 1: Select College or Company */}
           {step === "select" && (
             <motion.div
               key="select"
@@ -234,7 +224,7 @@ export default function LoginPage({ onLogin }: Props) {
               style={cardStyle}
             >
               <h2 className="text-center text-xl font-bold text-gray-900 mb-1">
-                Welcome to YumGo 🎉
+                Welcome 🎉
               </h2>
               <p className="text-center text-sm text-gray-600 mb-6">
                 Select how you'd like to continue
@@ -288,7 +278,6 @@ export default function LoginPage({ onLogin }: Props) {
             </motion.div>
           )}
 
-          {/* Step 2a: College Form */}
           {step === "college" && (
             <motion.div
               key="college"
@@ -367,11 +356,7 @@ export default function LoginPage({ onLogin }: Props) {
                           validateCollegeEmail(e.target.value),
                         );
                     }}
-                    className={`h-12 text-base rounded-xl bg-white ${
-                      collegeEmailError
-                        ? "border-red-400 focus-visible:ring-red-300"
-                        : "border-gray-300"
-                    }`}
+                    className={`h-12 text-base rounded-xl bg-white ${collegeEmailError ? "border-red-400 focus-visible:ring-red-300" : "border-gray-300"}`}
                     data-ocid="login.input"
                     required
                   />
@@ -399,11 +384,7 @@ export default function LoginPage({ onLogin }: Props) {
                       type="button"
                       onClick={() => setCollegeRole("student")}
                       data-ocid="login.role_student_button"
-                      className={`p-4 rounded-2xl border-2 text-center transition-all ${
-                        collegeRole === "student"
-                          ? "border-orange-500 bg-orange-50 text-orange-800"
-                          : "border-gray-200 bg-gray-50 hover:border-orange-300 text-gray-700"
-                      }`}
+                      className={`p-4 rounded-2xl border-2 text-center transition-all ${collegeRole === "student" ? "border-orange-500 bg-orange-50 text-orange-800" : "border-gray-200 bg-gray-50 hover:border-orange-300 text-gray-700"}`}
                     >
                       <div className="text-3xl mb-1">🎓</div>
                       <div className="font-semibold text-sm">Student</div>
@@ -412,11 +393,7 @@ export default function LoginPage({ onLogin }: Props) {
                       type="button"
                       onClick={() => setCollegeRole("shopOwner")}
                       data-ocid="login.role_owner_button"
-                      className={`p-4 rounded-2xl border-2 text-center transition-all ${
-                        collegeRole === "shopOwner"
-                          ? "border-orange-500 bg-orange-50 text-orange-800"
-                          : "border-gray-200 bg-gray-50 hover:border-orange-300 text-gray-700"
-                      }`}
+                      className={`p-4 rounded-2xl border-2 text-center transition-all ${collegeRole === "shopOwner" ? "border-orange-500 bg-orange-50 text-orange-800" : "border-gray-200 bg-gray-50 hover:border-orange-300 text-gray-700"}`}
                     >
                       <div className="text-3xl mb-1">🏪</div>
                       <div className="font-semibold text-sm">Shop Owner</div>
@@ -450,7 +427,6 @@ export default function LoginPage({ onLogin }: Props) {
             </motion.div>
           )}
 
-          {/* Step 2b: Company Form */}
           {step === "company" && (
             <motion.div
               key="company"

@@ -66,7 +66,7 @@ export default function App() {
   const { page, shopId } = nav;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Toaster richColors position="top-center" />
       {page === "login" && <LoginPage onLogin={onLogin} navigate={navigate} />}
       {page === "home" && (

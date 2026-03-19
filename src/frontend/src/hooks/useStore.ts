@@ -15,11 +15,12 @@ export interface MenuItem {
   imageUrl: string;
   price: number;
   isDeleted: boolean;
+  stock?: number; // undefined = unlimited
 }
 
 export interface Shop {
   id: string;
-  ownerId: string; // email
+  ownerId: string;
   collegeDomain: string;
   name: string;
   logoUrl: string;
@@ -101,6 +102,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 60,
       isDeleted: false,
+      stock: 15,
     },
     {
       id: "m2",
@@ -109,6 +111,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 50,
       isDeleted: false,
+      stock: 10,
     },
     {
       id: "m3",
@@ -117,6 +120,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 40,
       isDeleted: false,
+      stock: 20,
     },
     {
       id: "m4",
@@ -125,6 +129,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 45,
       isDeleted: false,
+      stock: 8,
     },
     {
       id: "m5",
@@ -133,6 +138,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 20,
       isDeleted: false,
+      stock: 30,
     },
     {
       id: "m6",
@@ -141,6 +147,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 55,
       isDeleted: false,
+      stock: 5,
     },
   ],
   "shop-2": [
@@ -151,6 +158,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 15,
       isDeleted: false,
+      stock: 50,
     },
     {
       id: "m8",
@@ -159,6 +167,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 20,
       isDeleted: false,
+      stock: 25,
     },
     {
       id: "m9",
@@ -167,6 +176,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 25,
       isDeleted: false,
+      stock: 12,
     },
     {
       id: "m10",
@@ -175,6 +185,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 20,
       isDeleted: false,
+      stock: 18,
     },
     {
       id: "m11",
@@ -183,6 +194,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 25,
       isDeleted: false,
+      stock: 20,
     },
   ],
   "shop-3": [
@@ -193,6 +205,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 80,
       isDeleted: false,
+      stock: 15,
     },
     {
       id: "m13",
@@ -201,6 +214,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 50,
       isDeleted: false,
+      stock: 10,
     },
     {
       id: "m14",
@@ -209,6 +223,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 15,
       isDeleted: false,
+      stock: 40,
     },
     {
       id: "m15",
@@ -217,6 +232,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 45,
       isDeleted: false,
+      stock: 20,
     },
     {
       id: "m16",
@@ -225,6 +241,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 90,
       isDeleted: false,
+      stock: 6,
     },
     {
       id: "m17",
@@ -233,6 +250,7 @@ const DEMO_MENU: Record<string, MenuItem[]> = {
       imageUrl: "",
       price: 35,
       isDeleted: false,
+      stock: 14,
     },
   ],
 };
@@ -352,6 +370,28 @@ export function useStore() {
     refresh();
   }
 
+  function reduceStock(shopId: string, orderedItems: OrderItem[]): void {
+    const all = getLS<Record<string, MenuItem[]>>("menuItems", {});
+    // Merge demo items into stored so we can update their stock
+    let items = all[shopId] ?? [];
+    if (DEMO_MENU[shopId]) {
+      const existingIds = new Set(items.map((i) => i.id));
+      const demoItems = DEMO_MENU[shopId].filter((d) => !existingIds.has(d.id));
+      items = [...demoItems, ...items];
+    }
+    for (const ordered of orderedItems) {
+      const idx = items.findIndex((i) => i.id === ordered.itemId);
+      if (idx >= 0 && items[idx].stock !== undefined) {
+        items[idx] = {
+          ...items[idx],
+          stock: Math.max(0, (items[idx].stock as number) - ordered.quantity),
+        };
+      }
+    }
+    all[shopId] = items;
+    setLS("menuItems", all);
+  }
+
   function placeOrder(
     order: Omit<Order, "id" | "billNumber" | "status" | "createdAt">,
   ): Order {
@@ -366,6 +406,8 @@ export function useStore() {
     orders.push(newOrder);
     setLS("orders", orders);
     setLS("lastOrder", newOrder);
+    // Reduce stock for all ordered items
+    reduceStock(order.shopId, order.items);
     refresh();
     return newOrder;
   }
