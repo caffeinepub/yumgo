@@ -19,11 +19,12 @@ interface Props {
   navigate: (page: Page, shopId?: string) => void;
 }
 
-function generateFoodImageUrl(foodName: string) {
+function generateFoodImageUrl(foodName: string, seed?: number) {
+  const s = seed ?? Math.floor(Math.random() * 10000);
   const prompt = encodeURIComponent(
     `${foodName}, delicious Indian canteen food, close-up food photography, vibrant colors, appetizing, white background`,
   );
-  return `https://image.pollinations.ai/prompt/${prompt}?width=400&height=400&nologo=true`;
+  return `https://image.pollinations.ai/prompt/${prompt}?width=400&height=400&nologo=true&seed=${s}`;
 }
 
 export default function OwnerMenu({ store, navigate }: Props) {
@@ -35,6 +36,7 @@ export default function OwnerMenu({ store, navigate }: Props) {
   const [newStock, setNewStock] = useState("");
   const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [editingPrice, setEditingPrice] = useState<Record<string, string>>({});
   const [editingStock, setEditingStock] = useState<Record<string, string>>({});
 
@@ -42,14 +44,23 @@ export default function OwnerMenu({ store, navigate }: Props) {
   useEffect(() => {
     if (!newName.trim() || newName.trim().length < 3) {
       setPreviewImageUrl("");
+      setImageError(false);
       return;
     }
     const timer = setTimeout(() => {
       setImageLoading(true);
+      setImageError(false);
       setPreviewImageUrl(generateFoodImageUrl(newName.trim()));
     }, 800);
     return () => clearTimeout(timer);
   }, [newName]);
+
+  function handleRegenerate() {
+    if (!newName.trim()) return;
+    setImageLoading(true);
+    setImageError(false);
+    setPreviewImageUrl(generateFoodImageUrl(newName.trim()));
+  }
 
   if (!shop) {
     navigate("owner");
@@ -80,6 +91,7 @@ export default function OwnerMenu({ store, navigate }: Props) {
     setNewStock("");
     setPreviewImageUrl("");
     setImageLoading(false);
+    setImageError(false);
     setShowAdd(false);
     toast.success("Item added!");
   }
@@ -340,6 +352,7 @@ export default function OwnerMenu({ store, navigate }: Props) {
             setNewStock("");
             setPreviewImageUrl("");
             setImageLoading(false);
+            setImageError(false);
           }
           setShowAdd(open);
         }}
@@ -363,29 +376,43 @@ export default function OwnerMenu({ store, navigate }: Props) {
             <div className="space-y-1">
               <Label className="text-xs flex items-center gap-1">
                 <span>🤖 AI Photo</span>
-                {imageLoading && previewImageUrl && (
-                  <span className="text-blue-500 text-xs">Generating...</span>
+                {imageLoading && previewImageUrl && !imageError && (
+                  <span className="text-blue-500 text-xs">Loading...</span>
                 )}
               </Label>
-              <div className="w-full h-36 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-dashed border-gray-300">
-                {previewImageUrl ? (
+              <div className="w-full h-36 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-dashed border-gray-300 relative">
+                {previewImageUrl && !imageError ? (
                   <img
                     src={previewImageUrl}
                     alt="AI preview"
                     className="w-full h-full object-cover rounded-xl"
                     onLoad={() => setImageLoading(false)}
-                    onError={() => setImageLoading(false)}
+                    onError={() => {
+                      setImageLoading(false);
+                      setImageError(true);
+                    }}
                   />
                 ) : (
                   <div className="text-center text-gray-400 text-xs px-4">
                     <div className="text-3xl mb-1">🍽️</div>
                     <p>
-                      Type the item name above and AI will generate a photo
-                      automatically
+                      {imageError
+                        ? "Photo failed to load. Try regenerating."
+                        : "Type the item name above and AI will generate a photo automatically"}
                     </p>
                   </div>
                 )}
               </div>
+              {/* Regenerate button */}
+              {newName.trim().length >= 3 && (
+                <button
+                  type="button"
+                  onClick={handleRegenerate}
+                  className="flex items-center gap-1.5 text-xs text-blue-600 font-medium hover:text-blue-800 transition-colors"
+                >
+                  🔄 Regenerate Photo
+                </button>
+              )}
               <p className="text-xs text-gray-400">
                 Photo is automatically generated based on the item name
               </p>
