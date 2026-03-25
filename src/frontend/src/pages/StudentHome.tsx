@@ -1,7 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
 import type { Page } from "../App";
 import type { Shop, useStore } from "../hooks/useStore";
 
@@ -26,7 +23,6 @@ const SHOP_CARD_COLORS = [
 
 export default function StudentHome({ store, navigate, onLogout }: Props) {
   const session = store.getSession()!;
-  const [showShops, setShowShops] = useState(false);
   const shops = store.getShops(session.collegeDomain);
 
   function getShopEmoji(i: number) {
@@ -63,9 +59,9 @@ export default function StudentHome({ store, navigate, onLogout }: Props) {
           </button>
         </div>
         <p className="text-white/80 text-sm">
-          Hi,{" "}
+          Hello,{" "}
           <span className="font-semibold text-white">
-            {session.email.split("@")[0]}
+            {session.name || session.email.split("@")[0]}
           </span>{" "}
           👋
         </p>
@@ -73,73 +69,38 @@ export default function StudentHome({ store, navigate, onLogout }: Props) {
       </div>
 
       <div className="px-4 mt-6 space-y-6">
-        {/* Hero Banner */}
-        <div
-          className="rounded-2xl p-5 text-white shadow-card"
-          style={{
-            background: "linear-gradient(135deg, #e94057 0%, #f27121 100%)",
-          }}
-        >
-          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
-            Order ahead, skip the queue
-          </p>
-          <h2 className="font-display text-2xl font-bold mt-1">Hungry? 🍽️</h2>
-          <p className="text-sm opacity-80 mt-1">
-            Pre-order from your college canteen
-          </p>
-          <Button
-            variant="secondary"
-            className="mt-4 rounded-xl font-semibold bg-white text-orange-600 hover:bg-orange-50"
-            onClick={() => setShowShops(true)}
-            data-ocid="home.menu_button"
-          >
-            Browse Canteens
-          </Button>
+        {/* Canteens — always visible */}
+        <div>
+          <h3 className="font-display text-xl font-bold mb-3 text-white">
+            Canteens at {session.collegeDomain}
+          </h3>
+          {shops.length === 0 ? (
+            <div
+              className="text-center py-10 text-white/60"
+              data-ocid="home.shops.empty_state"
+            >
+              <div className="text-5xl mb-3">🏪</div>
+              <p>No canteens found for your college yet.</p>
+              <p className="text-xs mt-2 text-white/40">
+                Ask your canteen owner to register their shop.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {shops.map((shop, i) => (
+                <ShopCard
+                  key={shop.id}
+                  shop={shop}
+                  emoji={getShopEmoji(i)}
+                  index={i + 1}
+                  menuCount={store.getMenuItems(shop.id).length}
+                  color={SHOP_CARD_COLORS[i % SHOP_CARD_COLORS.length]}
+                  onClick={() => navigate("shop", shop.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* Shops */}
-        {showShops && (
-          <div className="animate-slide-up">
-            <h3 className="font-display text-xl font-bold mb-3 text-white">
-              Canteens at {session.collegeDomain}
-            </h3>
-            {shops.length === 0 ? (
-              <div
-                className="text-center py-10 text-white/60"
-                data-ocid="home.shops.empty_state"
-              >
-                <div className="text-5xl mb-3">🏪</div>
-                <p>No canteens found for your college yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {shops.map((shop, i) => (
-                  <ShopCard
-                    key={shop.id}
-                    shop={shop}
-                    emoji={getShopEmoji(i)}
-                    index={i + 1}
-                    menuCount={store.getMenuItems(shop.id).length}
-                    color={SHOP_CARD_COLORS[i % SHOP_CARD_COLORS.length]}
-                    onClick={() => navigate("shop", shop.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {!showShops && (
-          <div className="grid grid-cols-2 gap-3">
-            {[0, 1].map((i) => (
-              <div key={i} className="bg-white/10 rounded-2xl p-4">
-                <Skeleton className="h-20 w-full rounded-xl mb-3 bg-white/20" />
-                <Skeleton className="h-4 w-3/4 mb-2 bg-white/20" />
-                <Skeleton className="h-3 w-1/2 bg-white/20" />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Bottom Nav */}
@@ -157,8 +118,6 @@ export default function StudentHome({ store, navigate, onLogout }: Props) {
         <button
           type="button"
           className="flex flex-col items-center gap-1 text-white/60"
-          onClick={() => setShowShops(true)}
-          data-ocid="home.menu_button"
         >
           <span className="text-xl">🍴</span>
           <span className="text-xs font-medium">Menu</span>

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Page } from "../../App";
 import type { MenuItem, useStore } from "../../hooks/useStore";
@@ -19,6 +19,13 @@ interface Props {
   navigate: (page: Page, shopId?: string) => void;
 }
 
+function generateFoodImageUrl(foodName: string) {
+  const prompt = encodeURIComponent(
+    `${foodName}, delicious Indian canteen food, close-up food photography, vibrant colors, appetizing, white background`,
+  );
+  return `https://image.pollinations.ai/prompt/${prompt}?width=400&height=400&nologo=true`;
+}
+
 export default function OwnerMenu({ store, navigate }: Props) {
   const session = store.getSession()!;
   const shop = store.getMyShop(session.email);
@@ -26,10 +33,23 @@ export default function OwnerMenu({ store, navigate }: Props) {
   const [newName, setNewName] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newStock, setNewStock] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
+  const [imageLoading, setImageLoading] = useState(false);
   const [editingPrice, setEditingPrice] = useState<Record<string, string>>({});
   const [editingStock, setEditingStock] = useState<Record<string, string>>({});
-  const imgRef = useRef<HTMLInputElement>(null);
+
+  // Auto-generate preview when name is typed (debounced)
+  useEffect(() => {
+    if (!newName.trim() || newName.trim().length < 3) {
+      setPreviewImageUrl("");
+      return;
+    }
+    const timer = setTimeout(() => {
+      setImageLoading(true);
+      setPreviewImageUrl(generateFoodImageUrl(newName.trim()));
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [newName]);
 
   if (!shop) {
     navigate("owner");
@@ -44,11 +64,12 @@ export default function OwnerMenu({ store, navigate }: Props) {
       toast.error("Enter item name and price");
       return;
     }
+    const imageUrl = previewImageUrl || generateFoodImageUrl(newName.trim());
     const item: MenuItem = {
       id: `item-${Date.now()}`,
       shopId: shop!.id,
       name: newName.trim(),
-      imageUrl: newImageUrl,
+      imageUrl,
       price: Number(newPrice),
       isDeleted: false,
       stock: newStock !== "" ? Number(newStock) : undefined,
@@ -57,7 +78,8 @@ export default function OwnerMenu({ store, navigate }: Props) {
     setNewName("");
     setNewPrice("");
     setNewStock("");
-    setNewImageUrl("");
+    setPreviewImageUrl("");
+    setImageLoading(false);
     setShowAdd(false);
     toast.success("Item added!");
   }
@@ -96,14 +118,6 @@ export default function OwnerMenu({ store, navigate }: Props) {
       return rest;
     });
     toast.success("Stock updated");
-  }
-
-  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setNewImageUrl(ev.target?.result as string);
-    reader.readAsDataURL(file);
   }
 
   return (
@@ -317,7 +331,19 @@ export default function OwnerMenu({ store, navigate }: Props) {
       </div>
 
       {/* Add Item Dialog */}
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+      <Dialog
+        open={showAdd}
+        onOpenChange={(open) => {
+          if (!open) {
+            setNewName("");
+            setNewPrice("");
+            setNewStock("");
+            setPreviewImageUrl("");
+            setImageLoading(false);
+          }
+          setShowAdd(open);
+        }}
+      >
         <DialogContent className="rounded-2xl mx-4">
           <DialogHeader>
             <DialogTitle>Add Menu Item</DialogTitle>
@@ -332,6 +358,39 @@ export default function OwnerMenu({ store, navigate }: Props) {
                 className="h-10 rounded-xl"
               />
             </div>
+
+            {/* AI-generated photo preview */}
+            <div className="space-y-1">
+              <Label className="text-xs flex items-center gap-1">
+                <span>🤖 AI Photo</span>
+                {imageLoading && previewImageUrl && (
+                  <span className="text-blue-500 text-xs">Generating...</span>
+                )}
+              </Label>
+              <div className="w-full h-36 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-dashed border-gray-300">
+                {previewImageUrl ? (
+                  <img
+                    src={previewImageUrl}
+                    alt="AI preview"
+                    className="w-full h-full object-cover rounded-xl"
+                    onLoad={() => setImageLoading(false)}
+                    onError={() => setImageLoading(false)}
+                  />
+                ) : (
+                  <div className="text-center text-gray-400 text-xs px-4">
+                    <div className="text-3xl mb-1">🍽️</div>
+                    <p>
+                      Type the item name above and AI will generate a photo
+                      automatically
+                    </p>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-400">
+                Photo is automatically generated based on the item name
+              </p>
+            </div>
+
             <div className="space-y-1">
               <Label className="text-xs">Price (₹)</Label>
               <Input
@@ -354,31 +413,6 @@ export default function OwnerMenu({ store, navigate }: Props) {
               <p className="text-xs text-gray-400">
                 Students will see how many portions are left
               </p>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Image (optional)</Label>
-              {newImageUrl && (
-                <img
-                  src={newImageUrl}
-                  alt="preview"
-                  className="w-20 h-20 rounded-xl object-cover"
-                />
-              )}
-              <input
-                ref={imgRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full rounded-xl"
-                onClick={() => imgRef.current?.click()}
-              >
-                Upload Image
-              </Button>
             </div>
             <Button type="submit" className="w-full rounded-xl">
               Add Item

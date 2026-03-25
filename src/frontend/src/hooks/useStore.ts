@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 export interface Session {
+  name: string;
   email: string;
   role: "student" | "shopOwner";
   collegeDomain: string;

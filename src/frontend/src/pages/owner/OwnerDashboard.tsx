@@ -99,7 +99,9 @@ export default function OwnerDashboard({ store, navigate, onLogout }: Props) {
         <h2 className="text-white font-display text-2xl font-bold mt-2">
           {shop?.name ?? "My Shop"}
         </h2>
-        <p className="text-white/60 text-sm">{session.email}</p>
+        <p className="text-white/60 text-sm">
+          Hello, {session.name || session.email.split("@")[0]} 👋
+        </p>
       </div>
 
       <div className="px-4 mt-5 space-y-4">

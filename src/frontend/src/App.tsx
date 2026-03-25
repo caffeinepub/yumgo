@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useStore } from "./hooks/useStore";
 import CheckoutPage from "./pages/CheckoutPage";
 import LoginPage from "./pages/LoginPage";
@@ -7,12 +7,14 @@ import OrderConfirmed from "./pages/OrderConfirmed";
 import PaymentPage from "./pages/PaymentPage";
 import ShopMenu from "./pages/ShopMenu";
 import StudentHome from "./pages/StudentHome";
+import WelcomePage from "./pages/WelcomePage";
 import OrderHistory from "./pages/owner/OrderHistory";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerMenu from "./pages/owner/OwnerMenu";
 import OwnerSettings from "./pages/owner/OwnerSettings";
 
 export type Page =
+  | "welcome"
   | "login"
   | "home"
   | "shop"
@@ -31,27 +33,20 @@ export interface NavState {
 
 export default function App() {
   const store = useStore();
-  const [nav, setNav] = useState<NavState>(() => {
-    // Initialize from session immediately to avoid flash
-    const session = store.getSession();
-    if (session) {
-      return { page: session.role === "shopOwner" ? "owner" : "home" };
-    }
-    return { page: "login" };
-  });
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount
-  useEffect(() => {
-    const session = store.getSession();
-    if (session) {
-      if (session.role === "shopOwner") setNav({ page: "owner" });
-      else setNav({ page: "home" });
-    }
-  }, []);
+  const [nav, setNav] = useState<NavState>({ page: "welcome" });
 
   function navigate(page: Page, shopId?: string) {
     setNav({ page, shopId });
     window.scrollTo(0, 0);
+  }
+
+  function onWelcomeDone() {
+    const session = store.getSession();
+    if (session) {
+      navigate(session.role === "shopOwner" ? "owner" : "home");
+    } else {
+      navigate("login");
+    }
   }
 
   function onLogin(role: "student" | "shopOwner") {
@@ -66,8 +61,9 @@ export default function App() {
   const { page, shopId } = nav;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: "#1a1a2e" }}>
       <Toaster richColors position="top-center" />
+      {page === "welcome" && <WelcomePage onDone={onWelcomeDone} />}
       {page === "login" && <LoginPage onLogin={onLogin} navigate={navigate} />}
       {page === "home" && (
         <StudentHome store={store} navigate={navigate} onLogout={onLogout} />

@@ -91,13 +91,15 @@ const floatingEmojis = [
 
 const cardStyle = {
   background: "#ffffff",
-  border: "1px solid rgba(251,191,36,0.25)",
+  border: "1px solid rgba(139,92,246,0.25)",
 };
 
 export default function LoginPage({ onLogin }: Props) {
   const store = useStore();
   const [step, setStep] = useState<Step>("select");
 
+  // College form state
+  const [collegeUserName, setCollegeUserName] = useState("");
   const [collegeName, setCollegeName] = useState("");
   const [collegeEmail, setCollegeEmail] = useState("");
   const [collegeRole, setCollegeRole] = useState<"student" | "shopOwner">(
@@ -105,21 +107,27 @@ export default function LoginPage({ onLogin }: Props) {
   );
   const [collegeEmailError, setCollegeEmailError] = useState("");
 
+  // Company form state
+  const [companyUserName, setCompanyUserName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
+  const [companyRole, setCompanyRole] = useState<"student" | "shopOwner">(
+    "student",
+  );
 
   const [loading, setLoading] = useState(false);
 
   function validateCollegeEmail(email: string): string {
     if (!email.includes("@")) return "Enter a valid email address";
-    const domain = extractDomain(email);
-    if (!domain.endsWith(".ac.in"))
-      return "Please use your college email ending with .ac.in";
     return "";
   }
 
   function handleCollegeSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!collegeUserName.trim()) {
+      toast.error("Enter your name");
+      return;
+    }
     if (!collegeName.trim()) {
       toast.error("Enter your college name");
       return;
@@ -132,6 +140,7 @@ export default function LoginPage({ onLogin }: Props) {
     setLoading(true);
     setTimeout(() => {
       store.setSession({
+        name: collegeUserName.trim(),
         email: collegeEmail.toLowerCase().trim(),
         role: collegeRole,
         collegeDomain: extractDomain(collegeEmail),
@@ -145,6 +154,10 @@ export default function LoginPage({ onLogin }: Props) {
 
   function handleCompanySubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!companyUserName.trim()) {
+      toast.error("Enter your name");
+      return;
+    }
     if (!companyName.trim()) {
       toast.error("Enter your company name");
       return;
@@ -156,14 +169,15 @@ export default function LoginPage({ onLogin }: Props) {
     setLoading(true);
     setTimeout(() => {
       store.setSession({
+        name: companyUserName.trim(),
         email: companyEmail.toLowerCase().trim(),
-        role: "student",
+        role: companyRole,
         collegeDomain: extractDomain(companyEmail),
         userType: "company",
         orgName: companyName.trim(),
       });
       setLoading(false);
-      onLogin("student");
+      onLogin(companyRole);
     }, 600);
   }
 
@@ -176,7 +190,7 @@ export default function LoginPage({ onLogin }: Props) {
           className="relative w-24 h-24 rounded-2xl mx-auto shadow-lg"
           style={{
             filter:
-              "drop-shadow(0 4px 16px rgba(234,88,12,0.5)) drop-shadow(0 0 8px rgba(251,191,36,0.4))",
+              "drop-shadow(0 4px 16px rgba(124,58,237,0.6)) drop-shadow(0 0 8px rgba(219,39,119,0.4))",
           }}
         />
       </div>
@@ -188,7 +202,7 @@ export default function LoginPage({ onLogin }: Props) {
       className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
       style={{
         background:
-          "linear-gradient(135deg, #c2410c 0%, #ea580c 20%, #f97316 45%, #fb923c 70%, #fbbf24 100%)",
+          "linear-gradient(135deg, #2d1b69 0%, #5b21b6 25%, #7c3aed 50%, #a21caf 75%, #db2777 100%)",
       }}
     >
       {floatingEmojis.map((item) => (
@@ -235,13 +249,13 @@ export default function LoginPage({ onLogin }: Props) {
                   type="button"
                   data-ocid="login.college_button"
                   onClick={() => setStep("college")}
-                  className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-orange-200 bg-orange-50 hover:border-orange-500 hover:bg-orange-100 transition-all active:scale-95"
+                  className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-purple-200 bg-purple-50 hover:border-purple-500 hover:bg-purple-100 transition-all active:scale-95"
                 >
                   <span className="text-4xl">🎓</span>
-                  <span className="font-bold text-orange-900 text-sm">
+                  <span className="font-bold text-purple-900 text-sm">
                     College
                   </span>
-                  <span className="text-xs text-orange-700 text-center">
+                  <span className="text-xs text-purple-700 text-center">
                     For students &amp; staff
                   </span>
                 </button>
@@ -249,32 +263,17 @@ export default function LoginPage({ onLogin }: Props) {
                   type="button"
                   data-ocid="login.company_button"
                   onClick={() => setStep("company")}
-                  className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-orange-200 bg-orange-50 hover:border-orange-500 hover:bg-orange-100 transition-all active:scale-95"
+                  className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 border-purple-200 bg-purple-50 hover:border-purple-500 hover:bg-purple-100 transition-all active:scale-95"
                 >
                   <span className="text-4xl">🏢</span>
-                  <span className="font-bold text-orange-900 text-sm">
+                  <span className="font-bold text-purple-900 text-sm">
                     Company
                   </span>
-                  <span className="text-xs text-orange-700 text-center">
+                  <span className="text-xs text-purple-700 text-center">
                     For corporate teams
                   </span>
                 </button>
               </div>
-
-              <p className="text-center text-xs text-gray-500 mt-5">
-                Try{" "}
-                <button
-                  type="button"
-                  className="text-orange-600 font-semibold underline underline-offset-2"
-                  onClick={() => {
-                    setStep("college");
-                    setCollegeEmail("student@demo.ac.in");
-                    setCollegeName("Demo College");
-                  }}
-                >
-                  demo college login
-                </button>
-              </p>
             </motion.div>
           )}
 
@@ -293,7 +292,7 @@ export default function LoginPage({ onLogin }: Props) {
                   type="button"
                   data-ocid="login.back_button"
                   onClick={() => setStep("select")}
-                  className="p-1.5 rounded-xl hover:bg-orange-100 text-orange-800 transition-colors"
+                  className="p-1.5 rounded-xl hover:bg-purple-100 text-purple-800 transition-colors"
                   aria-label="Go back"
                 >
                   <svg
@@ -318,6 +317,25 @@ export default function LoginPage({ onLogin }: Props) {
               </div>
 
               <form onSubmit={handleCollegeSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="collegeUserName"
+                    className="text-sm font-semibold text-gray-800"
+                  >
+                    Your Name
+                  </Label>
+                  <Input
+                    id="collegeUserName"
+                    type="text"
+                    placeholder="e.g. Rahul Kumar"
+                    value={collegeUserName}
+                    onChange={(e) => setCollegeUserName(e.target.value)}
+                    className="h-12 text-base rounded-xl bg-white border-gray-300"
+                    data-ocid="login.input"
+                    required
+                  />
+                </div>
+
                 <div className="space-y-1.5">
                   <Label
                     htmlFor="collegeName"
@@ -347,7 +365,7 @@ export default function LoginPage({ onLogin }: Props) {
                   <Input
                     id="collegeEmail"
                     type="email"
-                    placeholder="yourname@collegename.ac.in"
+                    placeholder="yourname@college.edu"
                     value={collegeEmail}
                     onChange={(e) => {
                       setCollegeEmail(e.target.value);
@@ -356,21 +374,20 @@ export default function LoginPage({ onLogin }: Props) {
                           validateCollegeEmail(e.target.value),
                         );
                     }}
-                    className={`h-12 text-base rounded-xl bg-white ${collegeEmailError ? "border-red-400 focus-visible:ring-red-300" : "border-gray-300"}`}
+                    className={`h-12 text-base rounded-xl bg-white ${
+                      collegeEmailError
+                        ? "border-red-400 focus-visible:ring-red-300"
+                        : "border-gray-300"
+                    }`}
                     data-ocid="login.input"
                     required
                   />
-                  {collegeEmailError ? (
+                  {collegeEmailError && (
                     <p
                       className="text-xs text-red-600 font-medium"
                       data-ocid="login.error_state"
                     >
                       {collegeEmailError}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500">
-                      Use your official college email (e.g.
-                      ram@mitcollege.ac.in)
                     </p>
                   )}
                 </div>
@@ -384,7 +401,11 @@ export default function LoginPage({ onLogin }: Props) {
                       type="button"
                       onClick={() => setCollegeRole("student")}
                       data-ocid="login.role_student_button"
-                      className={`p-4 rounded-2xl border-2 text-center transition-all ${collegeRole === "student" ? "border-orange-500 bg-orange-50 text-orange-800" : "border-gray-200 bg-gray-50 hover:border-orange-300 text-gray-700"}`}
+                      className={`p-4 rounded-2xl border-2 text-center transition-all ${
+                        collegeRole === "student"
+                          ? "border-purple-500 bg-purple-50 text-purple-800"
+                          : "border-gray-200 bg-gray-50 hover:border-purple-300 text-gray-700"
+                      }`}
                     >
                       <div className="text-3xl mb-1">🎓</div>
                       <div className="font-semibold text-sm">Student</div>
@@ -393,7 +414,11 @@ export default function LoginPage({ onLogin }: Props) {
                       type="button"
                       onClick={() => setCollegeRole("shopOwner")}
                       data-ocid="login.role_owner_button"
-                      className={`p-4 rounded-2xl border-2 text-center transition-all ${collegeRole === "shopOwner" ? "border-orange-500 bg-orange-50 text-orange-800" : "border-gray-200 bg-gray-50 hover:border-orange-300 text-gray-700"}`}
+                      className={`p-4 rounded-2xl border-2 text-center transition-all ${
+                        collegeRole === "shopOwner"
+                          ? "border-purple-500 bg-purple-50 text-purple-800"
+                          : "border-gray-200 bg-gray-50 hover:border-purple-300 text-gray-700"
+                      }`}
                     >
                       <div className="text-3xl mb-1">🏪</div>
                       <div className="font-semibold text-sm">Shop Owner</div>
@@ -403,27 +428,13 @@ export default function LoginPage({ onLogin }: Props) {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 rounded-xl text-base font-semibold bg-orange-500 hover:bg-orange-600 text-white"
+                  className="w-full h-12 rounded-xl text-base font-semibold bg-purple-600 hover:bg-purple-700 text-white"
                   disabled={loading}
                   data-ocid="login.submit_button"
                 >
                   {loading ? "Signing in..." : "Continue →"}
                 </Button>
               </form>
-
-              <p className="text-center text-xs text-gray-500 mt-4">
-                Try{" "}
-                <button
-                  type="button"
-                  className="text-orange-600 font-semibold underline underline-offset-2"
-                  onClick={() => {
-                    setCollegeEmail("student@demo.ac.in");
-                    setCollegeName("Demo College");
-                  }}
-                >
-                  demo credentials
-                </button>
-              </p>
             </motion.div>
           )}
 
@@ -442,7 +453,7 @@ export default function LoginPage({ onLogin }: Props) {
                   type="button"
                   data-ocid="login.back_button"
                   onClick={() => setStep("select")}
-                  className="p-1.5 rounded-xl hover:bg-orange-100 text-orange-800 transition-colors"
+                  className="p-1.5 rounded-xl hover:bg-purple-100 text-purple-800 transition-colors"
                   aria-label="Go back"
                 >
                   <svg
@@ -467,6 +478,25 @@ export default function LoginPage({ onLogin }: Props) {
               </div>
 
               <form onSubmit={handleCompanySubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="companyUserName"
+                    className="text-sm font-semibold text-gray-800"
+                  >
+                    Your Name
+                  </Label>
+                  <Input
+                    id="companyUserName"
+                    type="text"
+                    placeholder="e.g. Priya Sharma"
+                    value={companyUserName}
+                    onChange={(e) => setCompanyUserName(e.target.value)}
+                    className="h-12 text-base rounded-xl bg-white border-gray-300"
+                    data-ocid="login.input"
+                    required
+                  />
+                </div>
+
                 <div className="space-y-1.5">
                   <Label
                     htmlFor="companyName"
@@ -505,29 +535,49 @@ export default function LoginPage({ onLogin }: Props) {
                   />
                 </div>
 
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold text-gray-800">
+                    I am a...
+                  </Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCompanyRole("student")}
+                      data-ocid="login.role_employee_button"
+                      className={`p-4 rounded-2xl border-2 text-center transition-all ${
+                        companyRole === "student"
+                          ? "border-purple-500 bg-purple-50 text-purple-800"
+                          : "border-gray-200 bg-gray-50 hover:border-purple-300 text-gray-700"
+                      }`}
+                    >
+                      <div className="text-3xl mb-1">👔</div>
+                      <div className="font-semibold text-sm">Employee</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCompanyRole("shopOwner")}
+                      data-ocid="login.role_owner_button"
+                      className={`p-4 rounded-2xl border-2 text-center transition-all ${
+                        companyRole === "shopOwner"
+                          ? "border-purple-500 bg-purple-50 text-purple-800"
+                          : "border-gray-200 bg-gray-50 hover:border-purple-300 text-gray-700"
+                      }`}
+                    >
+                      <div className="text-3xl mb-1">🏪</div>
+                      <div className="font-semibold text-sm">Shop Owner</div>
+                    </button>
+                  </div>
+                </div>
+
                 <Button
                   type="submit"
-                  className="w-full h-12 rounded-xl text-base font-semibold bg-orange-500 hover:bg-orange-600 text-white"
+                  className="w-full h-12 rounded-xl text-base font-semibold bg-purple-600 hover:bg-purple-700 text-white"
                   disabled={loading}
                   data-ocid="login.submit_button"
                 >
                   {loading ? "Signing in..." : "Continue →"}
                 </Button>
               </form>
-
-              <p className="text-center text-xs text-gray-500 mt-4">
-                Try{" "}
-                <button
-                  type="button"
-                  className="text-orange-600 font-semibold underline underline-offset-2"
-                  onClick={() => {
-                    setCompanyEmail("member@demo.edu");
-                    setCompanyName("Demo Company");
-                  }}
-                >
-                  demo credentials
-                </button>
-              </p>
             </motion.div>
           )}
         </AnimatePresence>
