@@ -46,19 +46,13 @@ export default function WelcomePage({ onDone }: Props) {
         ))}
       </div>
 
-      {/* Logo and tagline — centered, no white box */}
+      {/* Logo only — tagline is part of the logo image */}
       <div className="flex flex-col items-center justify-center w-full">
         <img
           src="/assets/generated/welcome-logo-cropped.png"
           alt="YumGo"
-          className="w-44 h-auto object-contain mb-6"
+          className="w-64 h-auto object-contain"
         />
-        <h1
-          className="text-center font-bold text-3xl leading-snug"
-          style={{ color: "#2d6a4f", fontFamily: "Georgia, serif" }}
-        >
-          Where Every Bite Tells a Story
-        </h1>
       </div>
     </div>
   );

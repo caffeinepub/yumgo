@@ -20,11 +20,9 @@ interface Props {
 }
 
 function generateFoodImageUrl(foodName: string, seed?: number) {
-  const s = seed ?? Math.floor(Math.random() * 10000);
-  const prompt = encodeURIComponent(
-    `${foodName}, delicious Indian canteen food, close-up food photography, vibrant colors, appetizing, white background`,
-  );
-  return `https://image.pollinations.ai/prompt/${prompt}?width=400&height=400&nologo=true&seed=${s}`;
+  const s = seed ?? Math.floor(Math.random() * 1000);
+  const query = encodeURIComponent(`${foodName} food`);
+  return `https://source.unsplash.com/400x400/?${query}&sig=${s}`;
 }
 
 export default function OwnerMenu({ store, navigate }: Props) {
@@ -45,12 +43,14 @@ export default function OwnerMenu({ store, navigate }: Props) {
     if (!newName.trim() || newName.trim().length < 3) {
       setPreviewImageUrl("");
       setImageError(false);
+      setImageLoading(false);
       return;
     }
     const timer = setTimeout(() => {
       setImageLoading(true);
       setImageError(false);
-      setPreviewImageUrl(generateFoodImageUrl(newName.trim()));
+      const url = generateFoodImageUrl(newName.trim());
+      setPreviewImageUrl(url);
     }, 800);
     return () => clearTimeout(timer);
   }, [newName]);
@@ -59,7 +59,12 @@ export default function OwnerMenu({ store, navigate }: Props) {
     if (!newName.trim()) return;
     setImageLoading(true);
     setImageError(false);
-    setPreviewImageUrl(generateFoodImageUrl(newName.trim()));
+    setPreviewImageUrl(
+      generateFoodImageUrl(
+        newName.trim(),
+        Math.floor(Math.random() * 9000) + 1000,
+      ),
+    );
   }
 
   if (!shop) {
@@ -397,8 +402,8 @@ export default function OwnerMenu({ store, navigate }: Props) {
                     <div className="text-3xl mb-1">🍽️</div>
                     <p>
                       {imageError
-                        ? "Photo failed to load. Try regenerating."
-                        : "Type the item name above and AI will generate a photo automatically"}
+                        ? "Photo failed to load. Tap Regenerate to try again."
+                        : "Type the item name above and a photo will appear automatically"}
                     </p>
                   </div>
                 )}
