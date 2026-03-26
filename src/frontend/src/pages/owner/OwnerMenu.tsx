@@ -20,9 +20,9 @@ interface Props {
 }
 
 function generateFoodImageUrl(foodName: string, seed?: number) {
-  const s = seed ?? Math.floor(Math.random() * 1000);
-  const query = encodeURIComponent(`${foodName} food`);
-  return `https://source.unsplash.com/400x400/?${query}&sig=${s}`;
+  const s = seed ?? Math.floor(Math.random() * 9999);
+  const query = encodeURIComponent(foodName.toLowerCase().trim());
+  return `https://loremflickr.com/400/400/${query},food?random=${s}`;
 }
 
 export default function OwnerMenu({ store, navigate }: Props) {
